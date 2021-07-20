@@ -30,7 +30,7 @@
                 }
             },
             "required": [
-                "AWK",
+                "NOTATION",
                 "cp",
                 "PLINK2",
                 "Tabix"
