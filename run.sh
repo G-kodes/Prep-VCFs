@@ -6,5 +6,5 @@
 #PBS -N Prep-VCFs
 
 module load python-3.8.2
-cd /nlustre/users/graeme/Valid-VCFs/
+cd /nlustre/users/graeme/Prep-VCFs/
 snakemake --profile config/PBS-Torque-Profile
