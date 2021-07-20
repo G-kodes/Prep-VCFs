@@ -16,7 +16,7 @@
             "description": "An object containing key references to the commands needed to fire the executable softwares required for this pipeline",
             "type": "object",
             "properties": {
-                "AWK": {
+                "NOTATION": {
                     "type":"string"
                 },
                 "cp": {

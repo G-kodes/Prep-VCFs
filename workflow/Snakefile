@@ -38,13 +38,14 @@ rule CHR_NOTATION:
     output:
         "results/NOTATION/{filename}.vcf.gz"
     params:
-        executable=config["Executables"]["AWK"]
+        preloader=config["Executables"]["NOTATION"],
+        reX="'{if($0 !~ /^#/) print \"chr\"$0;else if(match($0,/(##contig=<ID=)(.*)/,m)) print m[1]\"chr\"m[2];else print $0 }'"
     conda:
         "envs/PREP-VCFS.yml"
     shell:
         """
         echo 'Changing CHR notation: {input.vcf} -> {output}'
-        {params.executable} {input.vcf} > {output}
+        {params.preloader} zcat {input.vcf} | awk {params.reX} | bgzip > {output}
         """
 
 rule VCF_FILTER:
