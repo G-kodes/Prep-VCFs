@@ -1,0 +1,18 @@
+{
+    "Files": [
+        "/nlustre/users/graeme/Datasets/1000g.vcf.gz",
+        "/nlustre/users/graeme/Datasets/1000g.vcf.gz.tbi"
+    ],
+    "Operations": [
+        {
+            "Type": "NOTATION",
+            "Value": "1-22"
+        }
+    ],
+    "Executables": {
+        "AWK": "awk '{if($0 !~ /^#/) print \"chr\"$0;else if(match($0,/(##contig=<ID=)(.*)/,m)) print m[1]\"chr\"m[2];else print $0 }'",
+        "cp": "ln -s",
+        "PLINK2": "module load plink-2; plink2",
+        "Tabix": "module load samtools-1.7; tabix"
+    }
+}

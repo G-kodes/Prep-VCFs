@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "G-Kodes | Valid-FASTAs Configuration Schema",
+    "description": "A JSON schema configuration file for the G-Kodes | Valid-FASTAs Snakemake pipeline",
+    "type": "object",
+    "properties": {
+        "Files": {
+            "description": "A list of objects containing the properties of the provided data",
+            "type":"array"
+        },
+        "Operations": {
+            "description": "A list of objects indicating which operations and with what arguments they should be performed",
+            "type": "array"
+        },
+        "Executables": {
+            "description": "An object containing key references to the commands needed to fire the executable softwares required for this pipeline",
+            "type": "object",
+            "properties": {
+                "AWK": {
+                    "type":"string"
+                },
+                "cp": {
+                    "type":"string"
+                },
+                "PLINK2": {
+                    "type": "string"
+                },
+                "Tabix": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "AWK",
+                "cp",
+                "PLINK2",
+                "Tabix"
+            ]
+        }
+    },
+    "required": [
+        "Files",
+        "Operations",
+        "Executables"
+    ]
+}

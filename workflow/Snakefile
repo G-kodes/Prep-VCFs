@@ -1,0 +1,112 @@
+from snakemake.utils import min_version, validate
+import os
+
+min_version("6.0")
+
+
+# DEFINE CONFIG FILE FOR SNAKEMAKE:
+configfile: os.path.join("config", "config.json")
+
+
+validate(config, os.path.join("..", "config", "config.schema.json"))
+
+
+reX = r"^([A-Z]{0,1}:{1}[\\|\/]{1,2}){0,1}(.+[\\\/])*(.+)(\.vcf|\.vcf\.gz|\.vcf\.gz\.tbi)$"
+
+
+include: "rules/common.py"
+
+rule all:
+    input:
+        expand(
+            "results/{filename}.{ext}",
+            filename=[
+                re.search(reX, item).group(3) for item in config["Files"]
+            ],
+            ext=["vcf.gz", "vcf.gz.tbi"],
+        ),
+
+rule CHR_NOTATION:
+    """
+    CHR notation change with awk
+    """
+
+    log:
+        "results/{filename}.log"
+    input:
+        unpack(getNotationInput)
+    output:
+        "results/NOTATION/{filename}.vcf.gz"
+    params:
+        executable=config["Executables"]["AWK"]
+    conda:
+        "envs/PREP-VCFS.yml"
+    shell:
+        """
+        echo 'Changing CHR notation: {input.vcf} -> {output}'
+        {params.executable} {input.vcf} > {output}
+        """
+
+rule VCF_FILTER:
+    """
+    PLINK-2.0 vcf prep
+    """
+
+    log:
+        "results/{filename}.log"
+    input:
+        unpack(getFilterInput)
+    output:
+        "results/FILTERED/{filename}.vcf.gz"
+    params:
+        executable=config["Executables"]["PLINK2"],
+        args=lambda: [item["Value"] for item in config["Operations"] if item["Type"] == "FILTER"].join(" ")
+    conda:
+        "envs/PREP-VCFS.yml"
+    shell:
+        """
+        echo 'Performing filters: {input} -> {output}'
+        {params.executable} {params.args} --vcf {input} --export vcf --out {output}
+        """
+
+rule CP:
+    """
+    Copy any files that do not require compression or generation
+    """
+
+    log:
+        "results/{filename}.CP.vcf.gz.log",
+    input:
+        getCpInput
+    output:
+        "results/{filename}.vcf.gz",
+    params:
+        executable=config["Executables"]["cp"],
+    conda:
+        "envs/VALID-FASTAS.yaml"
+    shell:
+        """
+        echo 'Copying {input} -> {output}'
+        {params.executable} "{input}" "{output}"
+        """
+
+rule TABIX_INDEXING:
+    """
+    Generate a Tabix index for the given VCF file
+    """
+
+    log:
+        "results/{filename}.log",
+    input:
+        "results/{filename}.vcf.gz"
+    output:
+        "results/{filename}.vcf.gz.tbi",
+    conda:
+        "envs/GATK4.yaml"
+    params:
+        executable=config["Executables"]["Tabix"],
+    shell:
+        """
+        echo 'Generating an index file: {input} -> {output}'
+        {params.executable} -f -p vcf {input}
+        """

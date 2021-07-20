@@ -1,0 +1,7 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependancies:
+  - snakemake-wrapper-utils ==0.1.3
+  - plink2
